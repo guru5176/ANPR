@@ -101,4 +101,4 @@ ocr_output = ocr.ocr(clean_plate, cls=False)
 ---
 
 ## 👥 Authors & Contributors
-* **Biprosom** ([github/guru5176](https://github.com/guru5176))
+* **iam_just_ken** ([github/guru5176](https://github.com/guru5176))
