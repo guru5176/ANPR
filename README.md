@@ -1,10 +1,10 @@
-# 🚗 Automatic Number Plate Recognition (ANPR) System
+#  Automatic Number Plate Recognition (ANPR) System
 
 A robust, deep-learning-based Automatic Number Plate Recognition (ANPR) pipeline utilizing **YOLO** for license plate detection and **PaddleOCR** for text extraction, optimized for processing challenging and faded license plates.
 
 ---
 
-## 📌 Features
+##  Features
 - **Object Detection**: Detects license plates dynamically in frames using a custom-trained YOLO model (`model/exp-4.pt`).
 - **High-Accuracy OCR**: Extracts license plate text using PaddleOCR with angle classification enabled.
 - **Indian License Plate Filtering**: Formats and validates text outputs against standard Indian license plate structures.
@@ -30,7 +30,7 @@ A robust, deep-learning-based Automatic Number Plate Recognition (ANPR) pipeline
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1. Prerequisites
 Ensure you have Python 3.8+ installed. It is recommended to use a virtual environment.
@@ -51,7 +51,7 @@ pip install ultralytics paddleocr paddlepaddle opencv-python
 
 ---
 
-## 💻 Script Reference & Usage
+##  Script Reference & Usage
 
 ### 1. End-to-End Pipeline (`test_pipeline.py`)
 This is the primary script. It detects the license plate using the custom YOLO model, crops the detected plate, and feeds it directly into PaddleOCR.
@@ -78,18 +78,18 @@ python test_paddleocr.py
 ### 4. OpenCV Image Restoration (`opencv_restoration.py`) [OPTIONAL]
 An optional utility module designed to pre-process license plate crops before passing them to the OCR engine. 
 
-#### 💡 Use Case
+####  Use Case
 Standard OCR engines like PaddleOCR can struggle to read characters on license plates that are **faded, dusty, weathered, or poorly lit**. This script acts as an intermediate preprocessing step between YOLO detection and OCR extraction to enhance text readability.
 
 **Do not use this by default**; it is designed specifically as an optional enhancement for low-contrast/faded plate images.
 
-#### 🛠️ Key Processing Steps:
+####  Key Processing Steps:
 1. **Grayscale Conversion**: Strips away color noise to focus purely on text contours.
 2. **CLAHE (Contrast Limited Adaptive Histogram Equalization)**: Maximizes local contrast to reveal faded characters.
 3. **Adaptive Gaussian Thresholding**: Evaluates local neighborhoods to force even faintly visible text into 100% solid black characters.
 4. **Morphological Erosion**: Thickens the resulting black text strokes so the OCR engine has more solid lines to process.
 
-#### 💻 How to Integrate:
+####  How to Integrate:
 ```python
 from opencv_restoration import restore_faded_plate
 
@@ -105,5 +105,5 @@ ocr_output = ocr.ocr(restored_plate, cls=False)
 
 ---
 
-## 👥 Authors & Contributors
+##  Authors & Contributors
 * **iam_just_ken** ([github/guru5176](https://github.com/guru5176))

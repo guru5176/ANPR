@@ -12,30 +12,12 @@ os.environ['FLAGS_use_mkldnn'] = '0'
 os.environ['FLAGS_enable_mkldnn'] = '0'
 
 def main():
-    parser = argparse.ArgumentParser(description="License Plate Recognition Live Camera Pipeline")
-    parser.add_argument(
-        "--source", 
-        type=str, 
-        default="0",
-        help="Camera source. Use '0' for default webcam, or an IP Camera URL (e.g., 'http://192.168.1.100:8080/video')"
-    )
+    parser = argparse.ArgumentParser(description="Laptop Camera Live Pipeline for ANPR")
     parser.add_argument(
         "--model", 
         type=str, 
         default=r"d:\anpr nvidia\model\exp-4.pt",
         help="Path to the YOLO model"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default="",
-        help="Optional path to save the output video (e.g., output.mp4)"
-    )
-    parser.add_argument(
-        "--export-txt",
-        type=str,
-        default="",
-        help="Optional path to save detected license plates to a text file (e.g., detected.txt)"
     )
     args = parser.parse_args()
 
@@ -45,42 +27,22 @@ def main():
     print("Initializing PaddleOCR...")
     ocr = PaddleOCR(use_angle_cls=True, lang='en')
 
-    # Handle integer (webcam index) or string (IP camera URL)
-    source = int(args.source) if args.source.isdigit() else args.source
+    # Source 0 is typically the built-in laptop webcam
+    source = 0
 
     cap = cv2.VideoCapture(source)
     if not cap.isOpened():
-        print(f"Error: Could not open camera source {args.source}")
+        print(f"Error: Could not open laptop webcam (source 0).")
         return
 
-    print(f"Successfully opened camera source: {args.source}")
+    print("Successfully opened laptop webcam!")
+    print("Hold up images of number plates to the camera to see live detections.")
     print("Press 'q' to quit.")
 
-    out = None
-    if args.output:
-        # Get video properties for writer
-        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        if fps == 0:
-            fps = 30 # Default if unable to get fps
-        
-        # Define codec and create VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(args.output, fourcc, fps, (frame_width, frame_height))
-        print(f"Saving output video to: {args.output}")
-
-    txt_out = None
-    if args.export_txt:
-        txt_out = open(args.export_txt, "a")
-        print(f"Saving detected text to: {args.export_txt}")
-
-    frame_count = 0
     while True:
         ret, frame = cap.read()
-        frame_count += 1
         if not ret:
-            print("Failed to grab frame. (Make sure the camera stream is active)")
+            print("Failed to grab frame. Check your webcam.")
             break
 
         # Run YOLO detection
@@ -95,7 +57,7 @@ def main():
                 # Draw bounding box for the plate
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 
-                if conf > 0.25: # Lowered YOLO Confidence threshold for blurry video
+                if conf > 0.4: # Decent confidence threshold for live webcam
                     # Crop the detected number plate
                     cropped_img = frame[max(0, y1):max(0, y2), max(0, x1):max(0, x2)]
                     
@@ -113,28 +75,19 @@ def main():
                                     if line and len(line) > 1:
                                         text = line[1][0]
                                         text_conf = line[1][1]
-                                        if text_conf > 0.1:
+                                        if text_conf > 0.4:
                                             plate_text += text + " "
                         
                         plate_text = plate_text.strip()
-                        if not plate_text:
-                             plate_text = "UNKNOWN"
                         
                         if plate_text:
                             # Display OCR text on the frame
                             cv2.putText(frame, plate_text, (x1, max(0, y1 - 10)), 
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-                            print(f"Frame {frame_count}: Detected Plate: {plate_text} (YOLO Conf: {conf:.2f})")
-                            
-                            if txt_out is not None:
-                                txt_out.write(f"Frame {frame_count}: {plate_text}\n")
+                            print(f"Live Plate Detected: {plate_text} (Conf: {conf:.2f})")
 
         # Show the frame
-        cv2.imshow('ANPR Live Feed', frame)
-        
-        # Write the frame to the output video if specified
-        if out is not None:
-            out.write(frame)
+        cv2.imshow('Laptop Camera Live Feed', frame)
 
         # Break loop on 'q' press
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -142,10 +95,6 @@ def main():
 
     # Clean up
     cap.release()
-    if out is not None:
-        out.release()
-    if txt_out is not None:
-        txt_out.close()
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
