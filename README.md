@@ -75,27 +75,32 @@ Performs a direct text extraction test on an image using PaddleOCR:
 python test_paddleocr.py
 ```
 
-### 4. Optional: OpenCV Restoration (`opencv_restoration.py`)
-An optional utility designed to sit between the YOLO crop step and PaddleOCR text extraction. It uses a mathematical image processing sequence to artificially thicken and contrast faded text on worn-out license plates.
+### 4. OpenCV Image Restoration (`opencv_restoration.py`) [OPTIONAL]
+An optional utility module designed to pre-process license plate crops before passing them to the OCR engine. 
 
-**Key Operations:**
-1. **Grayscale conversion** to strip color noise.
-2. **CLAHE** (Contrast Limited Adaptive Histogram Equalization) to optimize local contrast.
-3. **Adaptive Gaussian Thresholding** to convert characters to solid black.
-4. **Morphological Erosion** to thicken text lines for easier OCR identification.
+#### 💡 Use Case
+Standard OCR engines like PaddleOCR can struggle to read characters on license plates that are **faded, dusty, weathered, or poorly lit**. This script acts as an intermediate preprocessing step between YOLO detection and OCR extraction to enhance text readability.
 
-To use it in your custom pipeline:
+**Do not use this by default**; it is designed specifically as an optional enhancement for low-contrast/faded plate images.
+
+#### 🛠️ Key Processing Steps:
+1. **Grayscale Conversion**: Strips away color noise to focus purely on text contours.
+2. **CLAHE (Contrast Limited Adaptive Histogram Equalization)**: Maximizes local contrast to reveal faded characters.
+3. **Adaptive Gaussian Thresholding**: Evaluates local neighborhoods to force even faintly visible text into 100% solid black characters.
+4. **Morphological Erosion**: Thickens the resulting black text strokes so the OCR engine has more solid lines to process.
+
+#### 💻 How to Integrate:
 ```python
 from opencv_restoration import restore_faded_plate
 
-# 1. Detect & Crop
+# 1. Get raw plate crop from YOLO
 cropped_plate = frame[y1:y2, x1:x2]
 
-# 2. Restore Faded Text
-clean_plate = restore_faded_plate(cropped_plate)
+# 2. Apply optional restoration for faded/low-contrast plates
+restored_plate = restore_faded_plate(cropped_plate)
 
-# 3. Extract Text
-ocr_output = ocr.ocr(clean_plate, cls=False)
+# 3. Feed the enhanced plate crop into PaddleOCR
+ocr_output = ocr.ocr(restored_plate, cls=False)
 ```
 
 ---
