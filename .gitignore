@@ -1,2 +1,4 @@
 testimg/
 dataset/
+runs/
+__pycache__/

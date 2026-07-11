@@ -2,6 +2,7 @@ import os
 import torch
 import argparse
 import cv2
+import time
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
 
@@ -23,7 +24,10 @@ def process_image(img_path, yolo_model, ocr):
         return
 
     # Run YOLO detection
+    start_yolo = time.time()
     results = yolo_model(img)
+    end_yolo = time.time()
+    print(f"YOLO detection time: {end_yolo - start_yolo:.4f} seconds")
     
     detected = False
     for r in results:
@@ -37,7 +41,10 @@ def process_image(img_path, yolo_model, ocr):
             cropped_img = img[y1:y2, x1:x2]
             
             # Run PaddleOCR on the cropped image
+            start_ocr = time.time()
             ocr_result = ocr.ocr(cropped_img, cls=True)
+            end_ocr = time.time()
+            print(f"OCR time: {end_ocr - start_ocr:.4f} seconds")
             
             if ocr_result and ocr_result[0]:
                 for idx, res in enumerate(ocr_result):
