@@ -1,15 +1,16 @@
 import os
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+# Suppress PaddlePaddle warnings for cleaner output
+os.environ['FLAGS_enable_pir_api'] = '0'
+os.environ['FLAGS_use_mkldnn'] = '0'
+os.environ['FLAGS_enable_mkldnn'] = '0'
+
 import torch
 import cv2
 import time
 from flask import Flask, Response, render_template_string
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
-
-# Suppress PaddlePaddle warnings for cleaner output
-os.environ['FLAGS_enable_pir_api'] = '0'
-os.environ['FLAGS_use_mkldnn'] = '0'
-os.environ['FLAGS_enable_mkldnn'] = '0'
 
 app = Flask(__name__)
 
