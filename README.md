@@ -1,12 +1,12 @@
 #  Automatic Number Plate Recognition (ANPR) System
 
-A robust, deep-learning-based Automatic Number Plate Recognition (ANPR) pipeline utilizing **YOLO** for license plate detection and **PaddleOCR** for text extraction, optimized for processing challenging and faded license plates.
+A robust, deep-learning-based Automatic Number Plate Recognition (ANPR) pipeline utilizing **YOLO** for license plate detection and **PaddleOCR** or **RapidOCR** for text extraction, optimized for processing challenging and faded license plates.
 
 ---
 
 ##  Features
 - **Object Detection**: Detects license plates dynamically in frames using a custom-trained YOLO model (`model/exp-4.pt`).
-- **High-Accuracy OCR**: Extracts license plate text using PaddleOCR with angle classification enabled.
+- **High-Accuracy OCR**: Extracts license plate text using PaddleOCR (with angle classification) or RapidOCR (ONNX Runtime).
 - **Indian License Plate Filtering**: Formats and validates text outputs against standard Indian license plate structures.
 - **Image Restoration (Optional)**: Provides custom OpenCV image preprocessing (CLAHE + Gaussian Adaptive Thresholding + Erosion) to restore faded plate details prior to OCR.
 
@@ -25,6 +25,7 @@ A robust, deep-learning-based Automatic Number Plate Recognition (ANPR) pipeline
 ├── test_pipeline.py             # Main end-to-end detection and recognition pipeline
 ├── test_lprnet.py               # PaddleOCR script with Indian license plate pattern matching
 ├── test_paddleocr.py            # Basic PaddleOCR test script
+├── test_rapidocr.py             # Basic RapidOCR test script
 └── README.md                    # Project documentation
 ```
 
@@ -42,11 +43,11 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 ```
 
 ### 2. Dependencies
-Install the required packages. You will need `torch`, `ultralytics`, `paddlepaddle` (or `paddlepaddle-gpu` for CUDA support), and `paddleocr`.
+Install the required packages. You will need `torch`, `ultralytics`, `paddlepaddle` (or `paddlepaddle-gpu` for CUDA support), `paddleocr`, and `rapidocr_onnxruntime`.
 
 ```bash
 pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
-pip install ultralytics paddleocr paddlepaddle opencv-python
+pip install ultralytics paddleocr paddlepaddle opencv-python rapidocr_onnxruntime
 ```
 
 ---
@@ -75,7 +76,13 @@ Performs a direct text extraction test on an image using PaddleOCR:
 python test_paddleocr.py
 ```
 
-### 4. OpenCV Image Restoration (`opencv_restoration.py`) [OPTIONAL]
+### 4. RapidOCR Testing (`test_rapidocr.py`)
+Performs a direct text extraction test on an image using RapidOCR:
+```bash
+python test_rapidocr.py
+```
+
+### 5. OpenCV Image Restoration (`opencv_restoration.py`) [OPTIONAL]
 An optional utility module designed to pre-process license plate crops before passing them to the OCR engine. 
 
 ####  Use Case
@@ -99,11 +106,12 @@ cropped_plate = frame[y1:y2, x1:x2]
 # 2. Apply optional restoration for faded/low-contrast plates
 restored_plate = restore_faded_plate(cropped_plate)
 
-# 3. Feed the enhanced plate crop into PaddleOCR
-ocr_output = ocr.ocr(restored_plate, cls=False)
+# 3. Feed the enhanced plate crop into PaddleOCR / RapidOCR
+ocr_output = ocr(restored_plate)
 ```
 
 ---
 
 ##  Authors & Contributors
 * **iam_just_ken** ([github/guru5176](https://github.com/guru5176))
+
