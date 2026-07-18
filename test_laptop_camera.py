@@ -3,10 +3,10 @@ import torch
 import argparse
 import cv2
 import time
-from paddleocr import PaddleOCR
+from rapidocr_onnxruntime import RapidOCR
 from ultralytics import YOLO
 
-# Suppress PaddlePaddle warnings for cleaner output
+# Suppress warnings
 os.environ['FLAGS_enable_pir_api'] = '0'
 os.environ['FLAGS_use_mkldnn'] = '0'
 os.environ['FLAGS_enable_mkldnn'] = '0'
@@ -24,8 +24,8 @@ def main():
     print(f"Loading YOLO model from {args.model}...")
     yolo_model = YOLO(args.model)
 
-    print("Initializing PaddleOCR...")
-    ocr = PaddleOCR(use_angle_cls=True, lang='en')
+    print("Initializing RapidOCR...")
+    ocr = RapidOCR()
 
     # Source 0 is typically the built-in laptop webcam
     source = 0
@@ -65,18 +65,17 @@ def main():
                         # Optional: scale up the cropped image to help OCR
                         cropped_img = cv2.resize(cropped_img, (0, 0), fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
                         
-                        # Run PaddleOCR on the cropped image
-                        ocr_result = ocr.ocr(cropped_img, cls=True)
+                        # Run RapidOCR on the cropped image
+                        ocr_result, elapse = ocr(cropped_img)
                         
                         plate_text = ""
-                        if ocr_result and ocr_result[0]:
-                            for idx, res in enumerate(ocr_result):
-                                for line in res:
-                                    if line and len(line) > 1:
-                                        text = line[1][0]
-                                        text_conf = line[1][1]
-                                        if text_conf > 0.4:
-                                            plate_text += text + " "
+                        if ocr_result:
+                            for line in ocr_result:
+                                if line and len(line) > 2:
+                                    text = line[1]
+                                    text_conf = float(line[2])
+                                    if text_conf > 0.4:
+                                        plate_text += text + " "
                         
                         plate_text = plate_text.strip()
                         
