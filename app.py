@@ -27,7 +27,7 @@ def init_models():
     global yolo_model, paddle_ocr, rapid_ocr
     if yolo_model is None:
         print("Loading YOLO model...")
-        yolo_model = YOLO(r"d:\anpr nvidia\model\exp-4.pt")
+        yolo_model = YOLO(r"d:\anpr nvidia\model\exp-4.pt").to('cuda')
     
     if paddle_ocr is None:
         print("Initializing PaddleOCR...")

@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
 
     print(f"Loading YOLO model from {args.model}...")
-    yolo_model = YOLO(args.model)
+    yolo_model = YOLO(args.model).to('cuda')
 
     print("Initializing RapidOCR...")
     ocr = RapidOCR()
